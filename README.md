@@ -1,5 +1,7 @@
 # Expedia-Price-Sensitivity-Analysis-using-R
-##Expedia Price Sensitivity Analysis
+
+![image](https://github.com/user-attachments/assets/f5ff20df-f017-4512-ac32-17ca734d4342)
+
 
 ## Project Background
 
