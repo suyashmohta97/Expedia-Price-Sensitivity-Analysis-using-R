@@ -1,0 +1,218 @@
+---
+
+author: "Suyash Mohta"
+date: "2024-10-19"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+
+setwd("E:/MSBA Coursework Quarter-Wise/MSBA Fall '24/BAX 401 - III (Mike)/Homework 1")
+
+load("HW1.Rdata")
+
+
+library(dplyr)
+library(ggplot2)
+
+```
+## Table 1
+## Summary Table
+
+```{r}
+
+summary(Expedia)
+
+```
+
+
+
+## Q1.
+
+### Price Sensitivity to Booking Probability
+
+```{r}
+
+ggplot(Expedia)+
+  geom_point(aes(x=PricePerNight,y = `Booked?` ), stat = 'summary') +
+  geom_smooth(method='lm',formula = y ~ x, aes(y=`Booked?`,x=PricePerNight)) 
+
+```
+## Table 2
+```{r}
+
+x <- Expedia$PricePerNight
+y <- Expedia$`Booked?`
+
+summary(lm( y ~  x) )
+
+coeff <- -0.0007498
+price_sensitivity <- 100*coeff*100
+
+sprintf("For every 100$ increase in price we have a %.3f%% change in booking probability",price_sensitivity)
+```
+
+### Price Sensitivity to Number of Nights Booked
+
+```{r}
+
+ggplot(Expedia,aes(x=PricePerNight,y = Nights))+
+  geom_point( stat = 'summary') +
+  geom_smooth(method='lm',formula = y ~ x) 
+
+```
+
+
+
+## Table 3
+```{r}
+x <- Expedia$PricePerNight
+summary(lm(Expedia$Nights ~  x ))
+
+```
+
+
+```{r}
+
+x <- Expedia$PricePerNight
+summary( lm(Expedia$Nights ~  (x + I(x^2) ) )  )
+
+```
+
+
+```{r}
+
+x <- Expedia$PricePerNight
+summary(lm(Expedia$Nights ~  x + I(x^2) + I(x^3) ))
+
+```
+```{r}
+
+x <- Expedia$PricePerNight
+summary(lm(Expedia$Nights ~  x + I(x^2) + I(x^3) + I(x^4) ))
+
+
+```
+
+
+
+```{r}
+
+x <- Expedia$PricePerNight
+summary(lm(Expedia$Nights ~  log(x) ))
+
+```
+
+#### Highest R^2 Value is for linear model of Nights Booked vs Price Per Night
+
+
+
+## Q2.
+
+### Does Price Sensitivity vary by Region & User Income (Booked Probability & Nights Booked )
+
+
+```{r}
+
+## Booked vs Price Per Night by Region
+ggplot( Expedia,aes(y=`Booked?`,x=PricePerNight,color=Region) ) +
+  geom_point( stat='summary') +
+  geom_smooth(formula = y~x , se=FALSE)
+
+```
+
+
+```{r}
+
+## Nights vs Price Per Night by Region
+ggplot( Expedia,aes(y=Nights,x=PricePerNight,color=Region) ) +
+  geom_point( stat='summary') +
+  geom_smooth(formula = y~x , se=FALSE)
+
+```
+
+
+
+```{r}
+
+## We are trying to divide into equal groups for Income Group 1 & 2
+hist(Expedia$UserIncome)
+
+Expedia$IncGrp <- "Inc < $40K"
+Expedia$IncGrp <- ifelse(Expedia$UserIncome >= 85000, "Inc >= $85K", 
+                         ifelse( (Expedia$UserIncome >= 40000) &(Expedia$UserIncome < 85000),"Inc >= $40K & <$85K","Inc < $40K")
+                         )
+
+Expedia |> 
+  group_by(IncGrp) |> 
+  summarise( count = n())
+
+
+## Booked vs Price Per Night by Income Group
+ggplot( Expedia,aes(y=`Booked?`,x=PricePerNight,color= as.factor(IncGrp) )  ) +
+  geom_point( stat='summary') +
+  geom_smooth(formula = y~x , se=FALSE)
+
+```
+
+```{r}
+
+## Nights vs Price Per Night by Income Group
+ggplot( Expedia,aes(y=Nights,x=PricePerNight,color= as.factor(IncGrp) )  ) +
+  geom_point( stat='summary') +
+  geom_smooth(formula = y~x , se=FALSE)
+
+```
+
+```{r}
+
+## Regression output Booked vs PricePerNight Interacted with Region & Income Group
+
+summary(lm( Expedia$`Booked?` ~ Expedia$PricePerNight*Expedia$Region +
+                        Expedia$PricePerNight*Expedia$IncGrp))
+
+
+```
+
+
+```{r}
+
+summary(lm( Expedia$`Booked?` ~ Expedia$PricePerNight  + Expedia$Region + Expedia$IncGrp))
+
+```
+
+
+
+
+
+```{r}
+
+
+## Regression output Booked vs PricePerNight Interacted with Region & Income Group
+
+summary(lm( Expedia$Nights ~ Expedia$PricePerNight*Expedia$Region +
+                            Expedia$PricePerNight*Expedia$IncGrp))
+
+
+```
+
+
+
+
+
+
+```{r}
+
+summary(lm( Expedia$`Booked?` ~ Expedia$PricePerNight  + Expedia$Region + Expedia$IncGrp))
+
+
+```
+
